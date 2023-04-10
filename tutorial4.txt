@@ -227,6 +227,480 @@ sudo useradd -m u1
 To add various options to this command, we can add
 sudo useradd -m -d /home/james -c "C++ Developer" -s /bin/bash -G sudo,adm,mail james
 
+If we want expiry of a user, we can add the user as follows:
+sudo useradd -e 2020-12-31 u2
+
+To check the age of the user,
+chage -l james
+
+This reveals the details of the specific user, like the last password change, password expires
+password inactive, account expires, minimum number of days between password change, maximum number of days
+between password change, and number of days of warning before password expires.
+
+For user u2, it will show the account expires as Dec 31, 2020.
+
+Change the already available details of a user,
+sudo usermod -c "Golang Developer" james
+
+To add a group, we can use sudo groupadd developers
+To add a group, we can use sudo groupadd managers
+
+For adding the user james to these groups,
+sudo usermod -G developers, managers james
+
+sudo usermod -aG sudo james
+groups james
+
+To delete a user, sudo userdel -r james
+
+If we become another user, unless we add the user to the sudo group, that user is not able to execute commands
+even after using sudo.
+
+sudo groupadd engineering, creates a group.
+
+tail -3 /etc/group, reveals the most recent users.
+
+We can add users into groups by the following command,
+
+sudo useradd -G engineering u3
+
+groups u3
+
+To know the current user of the system, run whoami,
+it is equivalent to id -un
+
+To know the name of the user who initially logged in,
+just pass the command "who"
+
+The who -aH command shows more information about the currently logged in users.
+
+Whenever a user logs into a system, a record of that user is entered into a file,
+which can be accessed by ls -l /var/log/wtmp
+The last command will cover his last.
+
+##########################
+## Account Management
+##########################
+ 
+## IMPORTANT FILES
+# /etc/passwd # => users and info: username:x:uid:gid:comment:home_directory:login_shell
+# /etc/shadow # => users' passwords
+# /etc/group # => groups
+ 
+# creating a user account
+useradd [OPTIONS] username
+# OPTIONS:
+# -m => create home directory
+# -d directory => specify another home directory
+# -c "comment"
+# -s shell
+# -G => specify the secondary groups (must exist)
+# -g => specify the primary group (must exist)
+ 
+Exemple:
+useradd -m -d /home/john -c "C++ Developer" -s /bin/bash -G sudo,adm,mail john
+ 
+# changing a user account
+usermod [OPTIONS] username # => uses the same options as useradd
+Example:
+usermod -aG developers,managers john # => adding the user to two secondary groups
+ 
+# deleting a user account
+userdel -r username # => -r removes user's home directory as well
+ 
+# creating a group
+groupadd group_name
+ 
+# deleting a group
+groupdel group_name
+ 
+# displaying all groups
+cat /etc/groups
+ 
+# displaying the groups a user belongs to
+groups
+ 
+# creating admin users
+# add the user to sudo group in Ubuntu and wheel group in CentOS
+usermod -aG sudo john
+ 
+ 
+## Monitoring Users ##
+who -H # => displays logged in users
+id # => displays the current user and its groups
+whoami # => displays EUID
+ 
+# listing who’s logged in and what’s their current process.
+w
+uptime
+ 
+# printing information about the logins and logouts of the users
+last
+last -u username
+
+Q) How many primary groups can a user belong to?
+Answer: To only one
+
+Q) Input: grep student /etc/passwd
+Output: student:x:1001:1002::/home/student:bin/bash
+Input: grep student /etc/group
+Output: sudo:x:27:stud,student
+student:x:1002:
+
+Here the primary group of the user student is called student
+
+
+File Permissions -1
+
+
+File permissions (file modes) specify who can access, change or execute a file on a
+Linux System.
+It ensures that only authorized users and processes can access files and directories.
+Each file or directory has an owner and a group. By default, the owner is the user who
+creates the file and the group is the primary group of that user.
+The ownership of a file or a directory can be changed only by root using the chown and
+chgrp commands.
+For each file the permissions are assigned to three different categories of users:
+1. The file owner.
+2. The group owner.
+3. Others (anyone else or the whole world).
+
+
+File Permissions 2
+
+
+There are three file permissions types that apply to each category
+.The read permission ()
+.The write permission (w)
+The execute permission (x)
+To view the files permission run: Is -I or stat.
+stud@ubuntu-20:-$ ls -l /etc//passwd
+rw-r-r- 1 root root 2869 aug 2 16:05 etc/passwd
+stud@ubuntu-20:-$
+
+
+To view the file permissions, run the ls -l command.
+
+We get the output as such
+-rw-r--r--  1   root    root    2972    Aug 2   14:38   /etc/passwd
+The first triplet represents the owner permissions, the second triplet represents the group permissions,
+and the last triplet is everyone's permission.
+
+To remove the read permissions for the specific user, 
+chmod u-r users.txt
+To remove the write permission as well,
+chmod u-w users.txt
+
+Now, chmod 000 interfaces.txt actually removes the permissions for each one of them. It replaces all the
+permissions with dashes. But if we write with root, we are allowed to write with the help of root. If we try
+to read with root, we can read it.
+
+The file read and write permissions are only for non-privileged users.
+
+Changing File Permissions (chmod)
+
+chmod is the command used to change the permissions of a file or a directory using
+either the symbolic or the numeric notation.
+Only the root, or the file's owner, can change the file's permissions
+chmod who|[OPERATION][permissions] filename
+
+
+Changing File Permissions (chmod)
+
+chmod who|[OPERATION]Ipermissions] filename
+who signifies the user category whose permissions will be changed.
+u: the user that owns the file.
+g: the group that the file belongs to.
+o: the other users.
+The OPERATION flags define whether the permissions are to be removed, added, or set:
+a hyphen means remove the specified permissions.
++the plus sign means Add the specified permissions.
+equals means change the current permissions to the specified permissions.
+The permissions are specified using the letters r, w and x.
+
+
+To change the permissions for all the fields, we can execute the following command.
+
+chmod u-x, g+x, o-rwx user.txt
+
+To execute something that is valid for all ie users, groups and others as well, we can use
+the letter a.
+
+chmod a+r, a-wx, user.txt
+
+Another way to change the permissions is chmod ug=rw, o= user.txt 
+
+To have the same permissions as that of another file, we can run the following command,
+ls -l i.txt user.txt
+
+We can change the directory permissions as well. We will only be able to read the contents of the file in case we can only
+read it using the ls command.
+In case of directories, if the execute permission is not set, the write permission has no effect.
+
+The permissions of the parent directory are more important than that of the file.
+
+Changing the permissions of all the files in the directory to 640, the command for this is
+find ~ -type f -exec chmod 640 {} \;
+
+Changing the permissions of all the directories in a directory to 750, the command for this is
+find ~ -type d -exec chmod 750 {} \;
+
+lscpu lists all the information about the CPU.
+
+Changing the owner of the file, we can run sudo chown toor cpu.txt.
+
+To change the owner using the userid, sudo chown +1005 cpu.txt
+
+To change the group, we can use
+
+sudo chgrp :sudo cpu.txt
+
+Special Permissions - SUID (Set User D)
+
+Besides r, w and x for the owner, group and others there are 3 extra special permissions
+for each file or directory: SUID or Set User ID, SGID or Set Group ID and Sticky Bit.
+These special permissions are for a file or directory overall, not just for a user category.
+When an executable file with SUID is executed then the resulting process will have the
+permissions of the owner of the command, not the permissions of the user who
+executes the command.
+Setting SUID:
+Absolute Mode: chmod 4XXX file
+Relative Mode: chmod u+s file
+Is-I/usr/bin/passwd
+-rwsr-xr-x 1 root root 68208 apr 16 15:36 /usr/bin/passwd
+
+To add the suid permission, we can use sudo chmod u+s /usr/bin/cat
+
+To find the files or directories with a particular permission, we can use
+find /usr/bin/ -perm -4000
+
+
+Special Permissions - SGID (Set Group ID)
+
+SGID is set mainly to directories.
+If you set SGID on directories, all files or directories created inside that directory will be
+owned by the same group owner of the directory where SGID was configured.
+This is useful in creating shared directories, which are directories that are writable at
+the group level.
+Setting SGID:
+Absolute Mode: chmod 2XXX directory
+.Relative Mode: chmod g+s directory
+Is -Id /programming/
+drwxrws-2 pr1 programmers 4096 iul 14 13:15 /programming/
+
+
+We can change the owner and the group by the following command
+
+chown pr1:programmers /programming/
+
+To activate the SGID bit for the directories, 
+
+chmod 2770 /programming/
+
+This is how we activate the sgid bit.
+We can also acheive the same by
+chmod g+s /programming/
+
+Special Permissions The Sticky Bit
+
+The Sticky Bit is applied to directories.
+A user may only delete files that he owns or for which he has explicit write permission
+granted, even when he has write access to the directory.
+The sticky bit allows you to create a directory that everyone can use as a shared file
+storage. The files are protected because, no one can delete anyone else's files.
+Setting the sticky bit:
+Absolute Mode: chmod 1XXX directory
+Relative Mode: chmod ott directory
+Is -Id /temp/
+drwxrwxrwt 2 root root 4096 iul 14 13:45 /temp/
+
+
+To activate the sticky bit, we would have to prepend 1 to the already existing permissions.
+
+chmod 1777 /temp/
+chmod o+t /temp/
+
+If we attach the sticky bit, then another non-privileged user cannot delete the files in the ownership
+of another non-privileged user.
+
+It is considered that the default permissions for the file upon creation is 0666 for files and 0777 for directories.
+
+Executing umask command in the cli, we get the value as 0002.
+
+Now the default value for the permissions of the directory is 0777-0002=0775
+And the default value for permissions of the file is 0666-0002=0664
+
+We can change the desired value of umask by executing
+umask 0022
+
+If we use lsattr, we will notice that there are many dashes in the folders.
+The output can be as follows:
+--------------e-----    ./Desktop
+--------------e-----    ./Public
+--------------e-----    ./dir1
+--------------e-----    ./Documents
+...
+
+sudo chattr +a user.txt
+
+The +a means the append attribute is set.
+
+Now no one not even root can change the contents of the file.
+
+Another attribute is +A, which means no access time modification
+
+##########################
+## File Permissions
+##########################
+ 
+## LEGEND
+u = User
+g = Group
+o = Others/World
+a = all
+ 
+r = Read
+w = write
+x = execute
+- = no access
+ 
+# displaying the permissions (ls and stat)
+ls -l /etc/passwd
+    -rw-r--r-- 1 root root 2871 aug 22 14:43 /etc/passwd
+ 
+stat /etc/shadow
+    File: /etc/shadow
+    Size: 1721      	Blocks: 8          IO Block: 4096   regular file
+    Device: 805h/2053d	Inode: 524451      Links: 1
+    Access: (0640/-rw-r-----)  Uid: (    0/    root)   Gid: (   42/  shadow)
+    Access: 2020-08-24 11:31:49.506277118 +0300
+    Modify: 2020-08-22 14:43:36.326651384 +0300
+    Change: 2020-08-22 14:43:36.342652202 +0300
+    Birth: -
+ 
+# changing the permissions using the relative (symbolic) mode
+chmod u+r filename
+chmod u+r,g-wx,o-rwx filename
+chmod ug+rwx,o-wx filename
+chmod ugo+x filename
+chmod a+r,a-wx filename
+ 
+# changing the permissions using the absolute (octal) mode
+PERMISSIONS      EXAMPLE
+u   g   o
+rwx rwx rwx     chmod 777 filename
+rwx rwx r-x     chmod 775 filename
+rwx r-x r-x     chmod 755 filename
+rwx r-x ---     chmod 750 filename
+rw- rw- r--     chmod 664 filename
+rw- r-- r--     chmod 644 filename
+rw- r-- ---     chmod 640 filename
+ 
+# setting the permissions as of a reference file
+chmod --reference=file1 file2
+ 
+# changing permissions recursively
+chmod -R u+rw,o-rwx filename
+ 
+## SUID (Set User ID)
+ 
+# displaying the SUID permission
+ls -l /usr/bin/umount 
+    -rwsr-xr-x 1 root root 39144 apr  2 18:29 /usr/bin/umount
+ 
+stat /usr/bin/umount 
+    File: /usr/bin/umount
+    Size: 39144     	Blocks: 80         IO Block: 4096   regular file
+    Device: 805h/2053d	Inode: 918756      Links: 1
+    Access: (4755/-rwsr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)
+    Access: 2020-08-22 14:35:46.763999798 +0300
+    Modify: 2020-04-02 18:29:40.000000000 +0300
+    Change: 2020-06-30 18:27:32.851134521 +0300
+    Birth: -
+ 
+# setting SUID
+chmod u+s executable_file
+chmod 4XXX executable_file      # => Ex: chmod 4755 script.sh
+ 
+ 
+## SGID (Set Group ID)
+ 
+# displaying the SGID permission
+ls -ld projects/
+    drwxr-s--- 2 student student 4096 aug 25 11:02 projects/
+ 
+stat projects/
+    File: projects/
+    Size: 4096      	Blocks: 8          IO Block: 4096   directory
+    Device: 805h/2053d	Inode: 266193      Links: 2
+    Access: (2750/drwxr-s---)  Uid: ( 1001/ student)   Gid: ( 1002/ student)
+    Access: 2020-08-25 11:02:15.013355559 +0300
+    Modify: 2020-08-25 11:02:15.013355559 +0300
+    Change: 2020-08-25 11:02:19.157290764 +0300
+    Birth: -
+ 
+# setting SGID
+chmod 2750 projects/
+chmod g+s projects/
+ 
+ 
+## The Sticky Bit 
+ 
+# displaying the sticky bit permission
+ls -ld /tmp/
+    drwxrwxrwt 20 root root 4096 aug 25 10:49 /tmp/
+ 
+stat /tmp/
+    File: /tmp/
+    Size: 4096      	Blocks: 8          IO Block: 4096   directory
+    Device: 805h/2053d	Inode: 786434      Links: 20
+    Access: (1777/drwxrwxrwt)  Uid: (    0/    root)   Gid: (    0/    root)
+    Access: 2020-08-22 14:46:03.259455125 +0300
+    Modify: 2020-08-25 10:49:53.756211470 +0300
+    Change: 2020-08-25 10:49:53.756211470 +0300
+    Birth: -
+ 
+# setting the sticky bit
+mkdir temp
+chmod 1777 temp/
+chmod o+t temp/
+ls -ld temp/
+    drwxrwxrwt 2 student student 4096 aug 25 11:04 temp/
+ 
+ 
+## UMASK
+# displaying the UMASK
+umask 
+ 
+# setting a new umask value
+umask new_value     # => Ex: umask 0022
+ 
+## Changing File Ownership (root only)
+ 
+# changing the owner
+chown new_owner file/directory      # => Ex: sudo chown john a.txt
+ 
+# changing the group owner
+chgrp new_group file/directory
+ 
+# changing both the owner and the group owner
+chown new_owner:new_group file/directory
+ 
+# changing recursively the owner or the group owner
+chown -R new-owner file/directory
+ 
+# displaying the file attributes
+lsattr filename
+ 
+#changing the file attributes
+chattr +-attribute filename     # => Ex: sudo chattr +i report.txt
+
+Q) The root user runs the following command: chattr +i users.txt
+Who will be able to remove or change the file?
+Answer: Nobody, not even root
+
+
+
 
 
 
