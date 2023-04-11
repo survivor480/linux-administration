@@ -413,29 +413,150 @@ pstree
 pstree -c
 
 To tweak the refresh rate of top, we can type d, then we can input values even less than 1.
+To see the jobs of a particular user, we can use the option u, where we can specify the user
+To tweak the fields, we can press the f key, wherein to select a particular field, we can type the
+space key and this selects the field.
 
+To move the field up or down, we can select the field using the right arrow key, and then move the field up or down, based on our preference.
+When done, we can press escape and then we can see that the changes are reflected.
 
+To write the configuration such that the next time we come across the same setting we had before, press w for write.
 
+top -d 1 -n 3 -b > top_processes.txt
 
+This writes 3 iterations of the command to the text file.
 
+##########################
+## Dynamic Real-Time View of Processes(top)
+##########################
+ 
+# starting top
+top
+ 
+## top shortcuts while it's running
+h       # => getting help
+space   # => manual refresh
+d       # => setting the refresh delay in seconds
+q       # => quitting top
+u       # => display processes of a user
+m       # => changing the display for the memory
+1       # => individual statistics for each CPU
+x/y     # => highlighting the running process and the sorting column
+b       # => toggle between bold and text highlighting
+<       # => move the sorting column to the left
+>       # => move the sorting column to the right
+F       # => entering the Field Management screen 
+W       # => saving top settings
+ 
+# running top in batch mode (3 refreshes, 1 second delay)
+top -d 1 -n 3 -b > top_processes.txt
+ 
+# Interactive process viewer (top alternative)
+sudo apt update && sudo apt install htop    # => Installing htop
+htop
 
+If we use the kill -l command, it lists the different types of kill commands, that exist in linux
+To get the process id of a specific process, we can use the pgrep command,
 
+To send an interrupt signal, -2 is for SIGINT command to the process.
 
+To kill the process with the interrupt, we can use the kill -2 14804
 
+Another way of getting all the process ids of the processes is using the pidof command
+pidof firefox
 
+Output is somewhat 15029 14977 14960 14924 14871
 
+To kill the process with multiple pids, we can use the same command
+kill -INT 15029 14977 14960 14924 14871
 
+We can also use the -INT command instead of the -2 option
 
+To avoid always copying the process ids of the processes, we can use the following use case
+kill -SIGINT $(pidof firefox)
 
+Another useful process the is the HUP which is used to reload a process.
 
+We can reload the process by sudo kill -1 701
 
+If we pass in the term signal, there are three things that can take place:
+1) Process stops immediately
+2) Process stops with a little bit delay
+3) Process works indefinitely and ignores the term signal.
 
+The process can choose what to make out of the term signal
 
+sleep delays the execution for a certain amount of time.
 
+We can use the sleep command as
+sleep 311&
 
+We can then see all the sleep process by pgrep -l sleep
 
+killall -15 sleep
 
+The -15 is the option for terminate command
 
+pkill slee
+The pkill command can run by partial names as well.
+
+We can add a background job by adding an ampersand at the end.
+
+sleep 20 &
+
+When the process is running in the background, we dont have to wait for the process to end at all 
+to execute another one.
+
+nohub ifconfig &
+
+This executes the command in the background and then writes its output in the nohup.out
+
+##########################
+## Killing processes (kill, pkill, killall)
+##########################
+ 
+# listing all signals
+kill -l
+ 
+# sending a signal (default SIGTERM - 15) to a process by pid 
+kill pid        # => Ex: kill 12547
+ 
+# sending a signal to more processes
+kill -SIGNAL pid1 pid2 pid3 ...
+ 
+# sending a specific signal (SIGHUP - 1) to a process by pid
+kill -1 pid
+kill -HUP pid
+kill -SIGHUP pid
+ 
+# sending a signal (default SIGTERM - 15) to process by process name
+pkill process_name          # => Ex: pkill sleep
+killall process_name
+kill $(pidof process_name)  # => Ex: kill -HUP $(pidof sshd)
+ 
+# running a process in the background
+command &   # => Ex: sleep 100 &
+ 
+# Showing running jobs
+jobs
+ 
+# Stopping (pausing) the running process
+Ctrl + Z
+ 
+# resuming and bringing to the foreground a process by job_d
+fg %job_id
+ 
+# resuming in the background a process by job_d
+bg %job_id
+ 
+# starting a process immune to SIGHUP
+nohup command &     # => Ex: nohup wget http://site.com &
+
+Q) A user is running the ls command. What is the parent of the process?
+Answer: The Shell
+
+Q) How can you run a command to be sure that it doesn't get terminated when closing the terminal?
+Answer: Prefix the command with nohup
 
 
 
